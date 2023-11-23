@@ -20,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
     QuestionViewModel questionViewModel;
 
     Question question;
+    int currentIndex;
+    int scoreCorrect=0;
+    int scoreIncorrect=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         questionViewModel = new ViewModelProvider(this).get(QuestionViewModel.class);
         questionViewModel.currentIndex.observe(this, index -> {
+            currentIndex = questionViewModel.currentIndex.getValue();
             if(questionViewModel.quetionList.getValue().size()==0) return;
             question = questionViewModel.quetionList.getValue().get(index);
             binding.question.setText(question.getQuestion());
@@ -48,13 +52,18 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     lockAnswers();
-                    int id = answer.getId();
-                    if (finalI == 1) {
-
+                    if (finalI == question.correct) {
+                        scoreCorrect++;
                         answer.setBackgroundResource(R.drawable.correct_answer);
                     } else {
+                        scoreIncorrect++;
                         answer.setBackgroundResource(R.drawable.incorrect_answer);
                     }
+                    if(currentIndex < questionViewModel.quetionList.getValue().size() -1){
+                        questionViewModel.currentIndex.setValue(currentIndex +1);
+                        resetAnswers();
+                    }
+
                 }
             });
 
@@ -74,7 +83,9 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    void rsetAnswers (){
+    void resetAnswers (){
+        binding.scoreCorrect.setText(""+ scoreCorrect);
+        binding.scoreIncorrect.setText(""+ scoreIncorrect);
         TextView[] answers = {binding.answer1, binding.answer2, binding.answer3, binding.answer4};
 
         for (int i = 0; i < 4; i++) {
